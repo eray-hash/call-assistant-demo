@@ -1,0 +1,799 @@
+<title>Gesprächslotse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1B2321;
+    --paper: #F0F4F2;
+    --surface: #FFFFFF;
+    --surface-2: #E6ECE9;
+    --line: #D5DED9;
+    --accent: #256A73;
+    --accent-strong: #184D54;
+    --accent-soft: #DCEBEA;
+    --accent-contrast: #FBFEFD;
+    --signal: #BD4230;
+    --signal-soft: #F7E1DC;
+    --signal-contrast: #FFF8F6;
+    --muted: #58655F;
+    --shadow: 0 1px 2px rgba(20, 30, 27, 0.06), 0 8px 24px -12px rgba(20, 30, 27, 0.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #E9EFEC;
+      --paper: #101614;
+      --surface: #1A2220;
+      --surface-2: #212B28;
+      --line: #2C3733;
+      --accent: #5FB3AE;
+      --accent-strong: #8FD0CB;
+      --accent-soft: #1E3A38;
+      --accent-contrast: #0C1615;
+      --signal: #E37A63;
+      --signal-soft: #3A2521;
+      --signal-contrast: #FFF3EF;
+      --muted: #9DACA5;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 28px -14px rgba(0, 0, 0, 0.6);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #E9EFEC;
+    --paper: #101614;
+    --surface: #1A2220;
+    --surface-2: #212B28;
+    --line: #2C3733;
+    --accent: #5FB3AE;
+    --accent-strong: #8FD0CB;
+    --accent-soft: #1E3A38;
+    --accent-contrast: #0C1615;
+    --signal: #E37A63;
+    --signal-soft: #3A2521;
+    --signal-contrast: #FFF3EF;
+    --muted: #9DACA5;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 28px -14px rgba(0, 0, 0, 0.6);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mono, .t-time, .meta-value, .timer { font-family: "IBM Plex Mono", ui-monospace, "SF Mono", monospace; font-variant-numeric: tabular-nums; }
+
+  h1, h2, .brand-name { font-family: "Sora", ui-sans-serif, system-ui, sans-serif; text-wrap: balance; }
+
+  .app {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Header */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .brand { display: flex; align-items: center; gap: 12px; }
+
+  .brand-mark {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--accent-strong);
+    color: var(--accent-contrast);
+    display: flex; align-items: center; justify-content: center;
+    flex: none;
+  }
+
+  .brand-text { display: flex; flex-direction: column; line-height: 1.25; }
+  .brand-name { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+  .brand-tag { font-size: 12.5px; color: var(--muted); }
+
+  .channel-group {
+    display: flex;
+    gap: 6px;
+    padding: 4px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    box-shadow: var(--shadow);
+  }
+
+  .channel-chip {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
+  .channel-chip.is-active {
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+  }
+
+  /* Cards */
+  .call-card, .transcript-card, .protocol-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 22px;
+  }
+
+  .call-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .call-meta { display: flex; flex-direction: column; gap: 14px; flex: 1 1 240px; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field span { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .field input {
+    font: inherit;
+    font-size: 14.5px;
+    padding: 9px 12px;
+    border-radius: 9px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    max-width: 260px;
+  }
+  .field input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .meta-readout { display: flex; gap: 22px; }
+  .meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .meta-label { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .meta-value { font-size: 15px; font-weight: 500; }
+
+  .call-control { display: flex; align-items: center; gap: 16px; flex: none; }
+
+  .record-btn {
+    position: relative;
+    width: 76px; height: 76px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    background: var(--accent);
+    color: var(--accent-contrast);
+    display: flex; align-items: center; justify-content: center;
+    flex: none;
+  }
+  .record-btn:focus-visible { outline: 3px solid var(--accent-strong); outline-offset: 3px; }
+  .record-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .record-btn.is-recording { background: var(--signal); }
+
+  .record-btn-ring {
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 2px solid var(--signal);
+    opacity: 0;
+  }
+  .record-btn.is-recording .record-btn-ring {
+    opacity: 1;
+    animation: pulse-ring 1.8s ease-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .record-btn.is-recording .record-btn-ring { animation: none; opacity: 0.6; }
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(0.9); opacity: 0.7; }
+    100% { transform: scale(1.35); opacity: 0; }
+  }
+
+  .call-status { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 120px; }
+  .call-status > span:last-child { font-size: 14px; font-weight: 500; }
+
+  .status-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--muted);
+    display: inline-block;
+  }
+  .status-dot--recording { background: var(--signal); }
+  .status-dot--processing { background: var(--accent); }
+
+  .status-row { display: flex; align-items: center; gap: 8px; }
+
+  /* Transcript */
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .card-head h2 { font-size: 15.5px; font-weight: 600; margin: 0; }
+  .hint { font-size: 12px; color: var(--muted); }
+
+  .transcript-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 220px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .transcript-empty { color: var(--muted); font-size: 14px; margin: 0; }
+
+  .transcript-line { display: flex; gap: 10px; margin: 0; font-size: 14.5px; line-height: 1.5; }
+  .t-time { color: var(--muted); font-size: 12.5px; flex: none; padding-top: 2px; }
+  .t-text { flex: 1; }
+  .transcript-line--interim .t-text { color: var(--muted); font-style: italic; }
+
+  .manual-fallback { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .manual-fallback summary { cursor: pointer; font-size: 13px; color: var(--accent-strong); font-weight: 500; }
+  .manual-fallback textarea {
+    width: 100%; margin-top: 10px; min-height: 90px;
+    font: inherit; font-size: 14px; padding: 10px 12px;
+    border-radius: 9px; border: 1px solid var(--line);
+    background: var(--paper); color: var(--ink); resize: vertical;
+  }
+
+  .btn-secondary {
+    margin-top: 10px;
+    font: inherit; font-size: 13.5px; font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  /* Protocol */
+  .protocol-badge {
+    font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 4px 10px; border-radius: 999px;
+    background: var(--surface-2); color: var(--muted);
+  }
+  .protocol-badge.is-example { background: var(--surface-2); color: var(--muted); }
+  .protocol-badge.is-live { background: var(--signal-soft); color: var(--signal); }
+  .protocol-badge.is-manual { background: var(--accent-soft); color: var(--accent-strong); }
+
+  .protocol-meta {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    padding-bottom: 16px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .meta-pair { display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+  .meta-pair span { color: var(--muted); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .meta-pair strong { font-weight: 500; font-size: 14.5px; }
+
+  .protocol-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 600px) {
+    .protocol-grid { grid-template-columns: 1fr; }
+  }
+
+  .protocol-block h3 {
+    font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--muted); font-weight: 600; margin: 0 0 8px;
+  }
+  .protocol-block ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14.5px; line-height: 1.45; }
+  .protocol-block p { margin: 0; font-size: 14.5px; line-height: 1.5; }
+
+  .protocol-block--summary {
+    grid-column: 1 / -1;
+    background: var(--accent-soft);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-top: 2px;
+  }
+  .protocol-block--summary h3 { color: var(--accent-strong); }
+  .protocol-block--summary p { color: var(--ink); }
+
+  .protocol-loading {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; color: var(--muted);
+    padding-top: 10px;
+  }
+  .spinner {
+    width: 15px; height: 15px; border-radius: 50%;
+    border: 2px solid var(--line);
+    border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .protocol-error {
+    font-size: 13.5px; color: var(--signal);
+    background: var(--signal-soft);
+    border-radius: 9px;
+    padding: 10px 12px;
+    margin-top: 10px;
+  }
+
+  .foot-note {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    padding-top: 4px;
+  }
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 13v-1a8 8 0 0 1 16 0v1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <rect x="3" y="13" width="4.5" height="7" rx="1.6" fill="currentColor"/>
+          <rect x="16.5" y="13" width="4.5" height="7" rx="1.6" fill="currentColor"/>
+        </svg>
+      </span>
+      <div class="brand-text">
+        <span class="brand-name">Gesprächslotse</span>
+        <span class="brand-tag">Gesprächsprotokolle für Beratung &amp; Vertrieb</span>
+      </div>
+    </div>
+    <div class="channel-group" role="group" aria-label="Kanal wählen">
+      <button class="channel-chip is-active" data-channel="Webex" type="button">Webex</button>
+      <button class="channel-chip" data-channel="Mobilfunk" type="button">Mobilfunk</button>
+    </div>
+  </header>
+
+  <main style="display:flex; flex-direction:column; gap:20px;">
+    <section class="call-card">
+      <div class="call-meta">
+        <label class="field">
+          <span>Gesprächspartner</span>
+          <input id="partnerInput" type="text" placeholder="z. B. Familie Keller" />
+        </label>
+        <div class="meta-readout">
+          <div class="meta-item">
+            <span class="meta-label">Kanal</span>
+            <span class="meta-value" id="channelReadout">Webex</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Dauer</span>
+            <span class="meta-value timer" id="timerReadout">00:00</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="call-control">
+        <button id="recordBtn" class="record-btn" type="button" aria-pressed="false" aria-label="Aufnahme starten">
+          <span class="record-btn-ring" aria-hidden="true"></span>
+          <svg id="recordIcon" width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" fill="currentColor"/>
+            <path d="M6 11v1a6 6 0 0 0 12 0v-1M12 18v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div class="call-status">
+          <div class="status-row">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Bereit</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="transcript-card">
+      <div class="card-head">
+        <h2>Live-Mitschrift</h2>
+        <span class="hint" id="transcriptHint">Erscheint während der Aufnahme</span>
+      </div>
+      <div class="transcript-feed" id="transcriptFeed" aria-live="polite">
+        <p class="transcript-empty" id="transcriptEmpty">Noch keine Aufzeichnung. Klicke auf Start, um mitzuschreiben.</p>
+      </div>
+      <details class="manual-fallback" id="manualFallback">
+        <summary>Kein Mikrofonzugriff? Transkript manuell einfügen</summary>
+        <textarea id="manualText" placeholder="Gesprächstext hier einfügen …"></textarea>
+        <button id="manualSummarize" type="button" class="btn-secondary">Protokoll aus Text erstellen</button>
+      </details>
+    </section>
+
+    <section class="protocol-card">
+      <div class="card-head">
+        <h2>Gesprächsprotokoll</h2>
+        <span class="protocol-badge is-example" id="protocolBadge">Beispiel</span>
+      </div>
+      <div class="protocol-meta" id="protocolMeta"></div>
+      <div class="protocol-grid" id="protocolGrid"></div>
+      <div class="protocol-loading" id="protocolLoading" hidden>
+        <span class="spinner" aria-hidden="true"></span> Protokoll wird erstellt …
+      </div>
+      <div class="protocol-error" id="protocolError" hidden></div>
+    </section>
+  </main>
+
+  <footer class="foot-note">
+    Demo · Spracherkennung läuft lokal im Browser · kein Mitschnitt wird gespeichert · Zusammenfassung durch Claude
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var recordBtn = document.getElementById("recordBtn");
+  var statusDot = document.getElementById("statusDot");
+  var statusText = document.getElementById("statusText");
+  var timerReadout = document.getElementById("timerReadout");
+  var channelReadout = document.getElementById("channelReadout");
+  var transcriptFeed = document.getElementById("transcriptFeed");
+  var transcriptEmpty = document.getElementById("transcriptEmpty");
+  var transcriptHint = document.getElementById("transcriptHint");
+  var partnerInput = document.getElementById("partnerInput");
+  var protocolBadge = document.getElementById("protocolBadge");
+  var protocolMeta = document.getElementById("protocolMeta");
+  var protocolGrid = document.getElementById("protocolGrid");
+  var protocolLoading = document.getElementById("protocolLoading");
+  var protocolError = document.getElementById("protocolError");
+  var manualText = document.getElementById("manualText");
+  var manualSummarize = document.getElementById("manualSummarize");
+  var manualFallback = document.getElementById("manualFallback");
+  var channelChips = document.querySelectorAll(".channel-chip");
+
+  var currentChannel = "Webex";
+  var recognizing = false;
+  var recognition = null;
+  var startTime = null;
+  var timerInterval = null;
+  var finalLines = [];
+  var sample = null;
+
+  // ---- Sample capability (real Claude summarization) ----
+  (async function initSample() {
+    try {
+      if (window.claude && typeof window.claude.use === "function") {
+        sample = await window.claude.use("sample");
+      }
+    } catch (e) {
+      sample = null;
+    }
+  })();
+
+  // ---- Helpers ----
+  function fmtTime(totalSeconds) {
+    var m = Math.floor(totalSeconds / 60);
+    var s = totalSeconds % 60;
+    return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+  }
+
+  function elapsed() {
+    return startTime ? Math.floor((Date.now() - startTime) / 1000) : 0;
+  }
+
+  function el(tag, opts) {
+    var node = document.createElement(tag);
+    opts = opts || {};
+    if (opts.className) node.className = opts.className;
+    if (opts.text !== undefined) node.textContent = opts.text;
+    return node;
+  }
+
+  // ---- Channel chips ----
+  channelChips.forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      channelChips.forEach(function (c) { c.classList.remove("is-active"); });
+      chip.classList.add("is-active");
+      currentChannel = chip.getAttribute("data-channel");
+      channelReadout.textContent = currentChannel;
+    });
+  });
+
+  // ---- Timer ----
+  function startTimer() {
+    startTime = Date.now();
+    timerInterval = setInterval(function () {
+      timerReadout.textContent = fmtTime(elapsed());
+    }, 250);
+  }
+  function stopTimer() {
+    clearInterval(timerInterval);
+  }
+
+  // ---- Status ----
+  function setStatus(state) {
+    statusDot.className = "status-dot" + (state === "recording" ? " status-dot--recording" : state === "processing" ? " status-dot--processing" : "");
+    statusText.textContent = state === "recording" ? "Aufnahme läuft" : state === "processing" ? "Wird verarbeitet" : "Bereit";
+    recordBtn.classList.toggle("is-recording", state === "recording");
+    recordBtn.setAttribute("aria-pressed", state === "recording" ? "true" : "false");
+    recordBtn.setAttribute("aria-label", state === "recording" ? "Aufnahme stoppen" : "Aufnahme starten");
+  }
+
+  // ---- Transcript rendering ----
+  var interimEl = null;
+
+  function appendFinalLine(text, sec) {
+    if (transcriptEmpty && transcriptEmpty.parentNode) transcriptEmpty.remove();
+    var line = el("p", { className: "transcript-line" });
+    var time = el("span", { className: "t-time mono", text: fmtTime(sec) });
+    var body = el("span", { className: "t-text", text: text });
+    line.appendChild(time);
+    line.appendChild(body);
+    transcriptFeed.appendChild(line);
+    transcriptFeed.scrollTop = transcriptFeed.scrollHeight;
+  }
+
+  function setInterimLine(text) {
+    if (!text) {
+      if (interimEl) { interimEl.remove(); interimEl = null; }
+      return;
+    }
+    if (!interimEl) {
+      interimEl = el("p", { className: "transcript-line transcript-line--interim" });
+      var time = el("span", { className: "t-time mono", text: "" });
+      var body = el("span", { className: "t-text" });
+      interimEl.appendChild(time);
+      interimEl.appendChild(body);
+      transcriptFeed.appendChild(interimEl);
+    }
+    interimEl.lastChild.textContent = text;
+    transcriptFeed.scrollTop = transcriptFeed.scrollHeight;
+  }
+
+  // ---- Speech recognition ----
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var supportsSR = !!SR;
+
+  if (!supportsSR) {
+    recordBtn.disabled = true;
+    transcriptHint.textContent = "Spracherkennung wird von diesem Browser nicht unterstützt";
+    manualFallback.setAttribute("open", "");
+  }
+
+  function startRecording() {
+    if (!supportsSR || recognizing) return;
+    finalLines = [];
+    transcriptFeed.innerHTML = "";
+    interimEl = null;
+
+    recognition = new SR();
+    recognition.lang = "de-DE";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = function (event) {
+      var interimText = "";
+      for (var i = event.resultIndex; i < event.results.length; i++) {
+        var res = event.results[i];
+        var text = res[0].transcript.trim();
+        if (res.isFinal) {
+          if (text) {
+            var sec = elapsed();
+            finalLines.push({ t: sec, text: text });
+            appendFinalLine(text, sec);
+          }
+          setInterimLine("");
+        } else {
+          interimText += text;
+        }
+      }
+      if (interimText) setInterimLine(interimText);
+    };
+
+    recognition.onerror = function (event) {
+      if (event.error === "no-speech" || event.error === "aborted") return;
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        recognizing = false;
+        stopTimer();
+        setStatus("idle");
+        transcriptHint.textContent = "Mikrofonzugriff verweigert – bitte Berechtigung erteilen oder Text manuell einfügen";
+        manualFallback.setAttribute("open", "");
+      }
+    };
+
+    recognition.onend = function () {
+      if (recognizing) {
+        try { recognition.start(); } catch (e) { /* already running */ }
+      }
+    };
+
+    try {
+      recognition.start();
+    } catch (e) {
+      return;
+    }
+    recognizing = true;
+    startTimer();
+    setStatus("recording");
+    transcriptHint.textContent = "Aufnahme läuft …";
+  }
+
+  function stopRecording() {
+    if (!recognizing) return;
+    recognizing = false;
+    try { recognition && recognition.stop(); } catch (e) {}
+    stopTimer();
+    setInterimLine("");
+    setStatus("idle");
+    transcriptHint.textContent = "Aufnahme beendet";
+
+    if (finalLines.length > 0) {
+      var duration = fmtTime(elapsed());
+      var transcriptText = finalLines.map(function (l) {
+        return "[" + fmtTime(l.t) + "] " + l.text;
+      }).join("\n");
+      runSummary(transcriptText, {
+        label: "Live",
+        channel: currentChannel,
+        participant: partnerInput.value.trim() || "—",
+        duration: duration
+      });
+    }
+  }
+
+  recordBtn.addEventListener("click", function () {
+    if (recognizing) stopRecording(); else startRecording();
+  });
+
+  // ---- Manual fallback ----
+  manualSummarize.addEventListener("click", function () {
+    var text = manualText.value.trim();
+    if (!text) return;
+    runSummary(text, {
+      label: "Manuell",
+      channel: currentChannel,
+      participant: partnerInput.value.trim() || "—",
+      duration: "—"
+    });
+  });
+
+  // ---- Summarization ----
+  function buildPrompt(transcriptText) {
+    return "Du unterstützt einen Berater bei der Dokumentation eines Beratungs- bzw. Verkaufstelefonats (Immobilien- und Finanzierungsberatung). " +
+      "Lies das folgende Gesprächstranskript und erstelle daraus ein strukturiertes Gesprächsprotokoll auf Deutsch.\n\n" +
+      "Transkript:\n\"\"\"\n" + transcriptText + "\n\"\"\"\n\n" +
+      "Antworte AUSSCHLIESSLICH mit einem JSON-Objekt exakt in dieser Form, ohne weitere Erklärungen:\n" +
+      "{\n" +
+      "  \"kernthemen\": [\"kurzer Punkt\", \"...\"],\n" +
+      "  \"vereinbarungen\": [\"konkrete Zusage oder nächster Schritt\", \"...\"],\n" +
+      "  \"offene_punkte\": [\"noch zu klärender Punkt\", \"...\"],\n" +
+      "  \"stimmung\": \"ein kurzer Satz zur Gesprächsstimmung\",\n" +
+      "  \"zusammenfassung\": \"2-3 Sätze Gesamtzusammenfassung des Gesprächs\"\n" +
+      "}\n" +
+      "Falls ein Punkt aus dem Transkript nicht hervorgeht, gib für die jeweilige Liste ein leeres Array bzw. für Textfelder einen kurzen Hinweis wie \"nicht ersichtlich\" zurück.";
+  }
+
+  function errorCopy(code) {
+    switch (code) {
+      case "not_granted":
+      case "sampling_disabled":
+      case "not_declared":
+      case "capability_disabled":
+      case "capability_removed":
+        return "Die KI-Zusammenfassung ist in dieser Ansicht nicht verfügbar.";
+      case "rate_limited":
+        return "Gerade zu viele Anfragen – bitte kurz warten und erneut versuchen.";
+      case "invalid_json":
+        return "Die Antwort konnte nicht strukturiert werden – bitte erneut versuchen.";
+      case "session_expired":
+        return "Bitte erneut anmelden und noch einmal versuchen.";
+      case "refused":
+      case "empty_completion":
+        return "Es konnte kein Protokoll erstellt werden.";
+      default:
+        return "Kurzer Verbindungsfehler – bitte erneut versuchen.";
+    }
+  }
+
+  async function runSummary(transcriptText, meta) {
+    protocolError.hidden = true;
+    protocolLoading.hidden = false;
+    setStatus("processing");
+
+    if (!sample) {
+      protocolLoading.hidden = true;
+      setStatus("idle");
+      protocolError.hidden = false;
+      protocolError.textContent = errorCopy("not_declared");
+      return;
+    }
+
+    try {
+      var data = await sample.json(buildPrompt(transcriptText), { modelTier: "default" });
+      protocolLoading.hidden = true;
+      setStatus("idle");
+      renderProtocol(data, meta);
+    } catch (e) {
+      protocolLoading.hidden = true;
+      setStatus("idle");
+      if (e && e.code === "cancelled") return;
+      protocolError.hidden = false;
+      protocolError.textContent = errorCopy(e && e.code);
+    }
+  }
+
+  // ---- Protocol rendering ----
+  function renderProtocolMeta(meta) {
+    protocolMeta.innerHTML = "";
+    [["Teilnehmer", meta.participant], ["Kanal", meta.channel], ["Dauer", meta.duration]].forEach(function (pair) {
+      var wrap = el("div", { className: "meta-pair" });
+      var label = el("span", { text: pair[0] });
+      var value = el("strong", { text: pair[1] });
+      if (pair[0] === "Dauer") value.classList.add("mono");
+      wrap.appendChild(label);
+      wrap.appendChild(value);
+      protocolMeta.appendChild(wrap);
+    });
+  }
+
+  function buildListBlock(title, items) {
+    var block = el("div", { className: "protocol-block" });
+    block.appendChild(el("h3", { text: title }));
+    var list = Array.isArray(items) ? items.filter(Boolean) : [];
+    if (list.length === 0) {
+      block.appendChild(el("p", { text: "—" }));
+      return block;
+    }
+    var ul = document.createElement("ul");
+    list.forEach(function (item) {
+      var li = el("li", { text: String(item) });
+      ul.appendChild(li);
+    });
+    block.appendChild(ul);
+    return block;
+  }
+
+  function buildTextBlock(title, text, isSummary) {
+    var block = el("div", { className: isSummary ? "protocol-block protocol-block--summary" : "protocol-block" });
+    block.appendChild(el("h3", { text: title }));
+    block.appendChild(el("p", { text: text ? String(text) : "—" }));
+    return block;
+  }
+
+  function renderProtocol(data, meta) {
+    data = data || {};
+    protocolBadge.textContent = meta.label === "Live" ? "Live" : meta.label === "Manuell" ? "Manuell" : "Beispiel";
+    protocolBadge.className = "protocol-badge " + (meta.label === "Live" ? "is-live" : meta.label === "Manuell" ? "is-manual" : "is-example");
+
+    renderProtocolMeta(meta);
+
+    protocolGrid.innerHTML = "";
+    protocolGrid.appendChild(buildListBlock("Kernthemen", data.kernthemen));
+    protocolGrid.appendChild(buildListBlock("Vereinbarungen", data.vereinbarungen));
+    protocolGrid.appendChild(buildListBlock("Offene Punkte", data.offene_punkte));
+    protocolGrid.appendChild(buildTextBlock("Stimmung", data.stimmung));
+    protocolGrid.appendChild(buildTextBlock("Zusammenfassung", data.zusammenfassung, true));
+  }
+
+  // ---- Initial example state ----
+  renderProtocol({
+    kernthemen: [
+      "Finanzierungsrahmen für eine 3-Zimmer-Eigentumswohnung",
+      "Zinsbindung: 10 Jahre vs. 15 Jahre im Vergleich",
+      "Eigenkapitalquote und mögliche Förderungen"
+    ],
+    vereinbarungen: [
+      "Gehaltsnachweise und Grundbuchauszug bis Freitag einreichen",
+      "Folgetermin: Dienstag, 11:00 Uhr"
+    ],
+    offene_punkte: [
+      "Anschlusskonditionen nach Ablauf der Zinsbindung klären",
+      "Nebenkostenkalkulation gemeinsam prüfen"
+    ],
+    stimmung: "Aufgeschlossen und interessiert, bei den Nebenkosten noch preissensibel.",
+    zusammenfassung: "Frau Keller sucht eine Finanzierung für eine Eigentumswohnung und favorisiert aktuell eine 10-jährige Zinsbindung. Die nötigen Unterlagen werden bis Freitag nachgereicht, ein Folgetermin ist für kommenden Dienstag vereinbart."
+  }, {
+    label: "Beispiel",
+    channel: "Webex",
+    participant: "Familie Keller",
+    duration: "14:32"
+  });
+})();
+</script>
