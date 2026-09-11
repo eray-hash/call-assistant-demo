@@ -1,8 +1,15 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Gesprächslotse</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+  [hidden] { display: none !important; }
+
   :root {
     --ink: #1B2321;
     --paper: #F0F4F2;
@@ -332,7 +339,31 @@
     color: var(--muted);
     padding-top: 4px;
   }
+
+  /* Mobile */
+  @media (max-width: 560px) {
+    .app { padding: 20px 16px 48px; gap: 16px; }
+
+    .topbar { flex-direction: column; align-items: stretch; gap: 12px; }
+    .channel-group { align-self: flex-start; }
+    .channel-chip { padding: 9px 16px; }
+
+    .call-card, .transcript-card, .protocol-card { padding: 18px; border-radius: 14px; }
+
+    .call-card { flex-direction: column; align-items: stretch; gap: 18px; }
+    .call-meta { flex: none; }
+    .field input { max-width: none; }
+    .meta-readout { justify-content: space-between; }
+
+    .call-control { justify-content: space-between; }
+    .call-status { min-width: 0; }
+
+    .protocol-meta { gap: 16px; }
+    .protocol-block--summary { padding: 14px 16px; }
+  }
 </style>
+</head>
+<body>
 
 <div class="app">
   <header class="topbar">
@@ -769,3 +800,5 @@
   });
 })();
 </script>
+</body>
+</html>
