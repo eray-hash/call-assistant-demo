@@ -6,6 +6,6 @@
   "description": "Gesprächslotse – Live-Anruf-Mitschrift und KI-Gesprächsprotokoll",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.125.0",
-    "zod": "^3.24.1"
+    "zod": "^4.6.2"
   }
 }
