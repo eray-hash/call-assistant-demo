@@ -16,6 +16,10 @@ Wenn ein Punkt aus dem Transkript nicht hervorgeht, gib für Listenfelder ein le
 
 const client = new Anthropic();
 
+export const config = {
+  maxDuration: 60,
+};
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "method_not_allowed" });
