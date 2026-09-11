@@ -1,17 +1,31 @@
 # Gesprächslotse
 
-Live-Demo einer Webapp, die Telefonate (z. B. über Webex oder Mobilfunk, per Lautsprecher oder Headset) live mitschreibt und per Knopfdruck zu einem strukturierten Gesprächsprotokoll zusammenfasst.
+Webapp, die Telefonate (z. B. über Webex oder Mobilfunk, per Lautsprecher oder Headset) live mitschreibt und per Knopfdruck zu einem strukturierten Gesprächsprotokoll zusammenfasst.
 
 ## Funktionsweise
 
 - **Start/Stop** nimmt über das Mikrofon des Geräts auf und transkribiert live im Browser (Web Speech API, `de-DE`).
-- Nach **Stop** erstellt Claude aus der Mitschrift automatisch ein Protokoll: Kernthemen, Vereinbarungen, offene Punkte, Stimmung, Kurzzusammenfassung.
+- Nach **Stop** schickt das Frontend die Mitschrift an `/api/summarize`, eine serverseitige Funktion, die über die offizielle Anthropic-SDK ein strukturiertes Protokoll erzeugt: Kernthemen, Vereinbarungen, offene Punkte, Stimmung, Kurzzusammenfassung (als validiertes JSON via `output_config.format`).
 - Fallback: Transkript lässt sich auch manuell einfügen, falls Mikrofon/Browser nicht mitspielen.
-- Reine Client-Anwendung, keine eigene Server-Komponente — die KI-Zusammenfassung läuft über die `sample`-Capability der Anzeigeumgebung.
+- Der Anthropic-API-Key liegt ausschließlich serverseitig (Umgebungsvariable), nie im Frontend-Code.
 
-## Nutzung
+## Deployment (Vercel empfohlen)
 
-`index.html` direkt im Browser öffnen (Chrome empfohlen, für die Spracherkennung) oder über GitHub Pages / einen beliebigen statischen Webserver hosten.
+1. Repo in [vercel.com/new](https://vercel.com/new) importieren (Node-Projekt, Framework-Preset "Other" — `api/` wird automatisch als Serverless Function erkannt).
+2. Umgebungsvariable `ANTHROPIC_API_KEY` in den Projekteinstellungen setzen (Wert aus [console.anthropic.com](https://console.anthropic.com)).
+3. Deploy — danach läuft sowohl die statische Seite als auch `/api/summarize` unter derselben Domain.
+
+## Lokale Entwicklung
+
+```bash
+npm install
+npm i -g vercel   # falls noch nicht vorhanden
+vercel dev
+```
+
+`vercel dev` startet Frontend und `/api`-Funktion zusammen (braucht `ANTHROPIC_API_KEY` in einer lokalen `.env`, siehe `.env.example`).
+
+**Hinweis:** Reines Hosting über GitHub Pages reicht nicht mehr aus — GitHub Pages kann nur statische Dateien ausliefern, keine Serverless Function. Für die echte KI-Zusammenfassung ist eine Plattform mit Funktions-Unterstützung nötig (Vercel, Netlify, Cloudflare Pages o. ä.).
 
 ## Status
 

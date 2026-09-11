@@ -1,0 +1,11 @@
+{
+  "name": "call-assistant-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Gesprächslotse – Live-Anruf-Mitschrift und KI-Gesprächsprotokoll",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.0",
+    "zod": "^3.24.1"
+  }
+}

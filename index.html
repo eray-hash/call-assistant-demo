@@ -454,18 +454,6 @@
   var startTime = null;
   var timerInterval = null;
   var finalLines = [];
-  var sample = null;
-
-  // ---- Sample capability (real Claude summarization) ----
-  (async function initSample() {
-    try {
-      if (window.claude && typeof window.claude.use === "function") {
-        sample = await window.claude.use("sample");
-      }
-    } catch (e) {
-      sample = null;
-    }
-  })();
 
   // ---- Helpers ----
   function fmtTime(totalSeconds) {
@@ -655,38 +643,16 @@
   });
 
   // ---- Summarization ----
-  function buildPrompt(transcriptText) {
-    return "Du unterstützt einen Berater bei der Dokumentation eines Beratungs- bzw. Verkaufstelefonats (Immobilien- und Finanzierungsberatung). " +
-      "Lies das folgende Gesprächstranskript und erstelle daraus ein strukturiertes Gesprächsprotokoll auf Deutsch.\n\n" +
-      "Transkript:\n\"\"\"\n" + transcriptText + "\n\"\"\"\n\n" +
-      "Antworte AUSSCHLIESSLICH mit einem JSON-Objekt exakt in dieser Form, ohne weitere Erklärungen:\n" +
-      "{\n" +
-      "  \"kernthemen\": [\"kurzer Punkt\", \"...\"],\n" +
-      "  \"vereinbarungen\": [\"konkrete Zusage oder nächster Schritt\", \"...\"],\n" +
-      "  \"offene_punkte\": [\"noch zu klärender Punkt\", \"...\"],\n" +
-      "  \"stimmung\": \"ein kurzer Satz zur Gesprächsstimmung\",\n" +
-      "  \"zusammenfassung\": \"2-3 Sätze Gesamtzusammenfassung des Gesprächs\"\n" +
-      "}\n" +
-      "Falls ein Punkt aus dem Transkript nicht hervorgeht, gib für die jeweilige Liste ein leeres Array bzw. für Textfelder einen kurzen Hinweis wie \"nicht ersichtlich\" zurück.";
-  }
-
   function errorCopy(code) {
     switch (code) {
-      case "not_granted":
-      case "sampling_disabled":
-      case "not_declared":
-      case "capability_disabled":
-      case "capability_removed":
-        return "Die KI-Zusammenfassung ist in dieser Ansicht nicht verfügbar.";
+      case "server_misconfigured":
+        return "Der Server ist noch nicht eingerichtet (fehlender API-Key).";
       case "rate_limited":
         return "Gerade zu viele Anfragen – bitte kurz warten und erneut versuchen.";
       case "invalid_json":
         return "Die Antwort konnte nicht strukturiert werden – bitte erneut versuchen.";
-      case "session_expired":
-        return "Bitte erneut anmelden und noch einmal versuchen.";
-      case "refused":
-      case "empty_completion":
-        return "Es konnte kein Protokoll erstellt werden.";
+      case "invalid_request":
+        return "Das Transkript konnte nicht verarbeitet werden.";
       default:
         return "Kurzer Verbindungsfehler – bitte erneut versuchen.";
     }
@@ -697,23 +663,29 @@
     protocolLoading.hidden = false;
     setStatus("processing");
 
-    if (!sample) {
-      protocolLoading.hidden = true;
-      setStatus("idle");
-      protocolError.hidden = false;
-      protocolError.textContent = errorCopy("not_declared");
-      return;
-    }
-
     try {
-      var data = await sample.json(buildPrompt(transcriptText), { modelTier: "default" });
+      var response = await fetch("/api/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transcript: transcriptText })
+      });
+
+      if (!response.ok) {
+        var code = "upstream_error";
+        try {
+          var errBody = await response.json();
+          code = errBody && errBody.error ? errBody.error : code;
+        } catch (parseErr) {}
+        throw { code: code };
+      }
+
+      var data = await response.json();
       protocolLoading.hidden = true;
       setStatus("idle");
       renderProtocol(data, meta);
     } catch (e) {
       protocolLoading.hidden = true;
       setStatus("idle");
-      if (e && e.code === "cancelled") return;
       protocolError.hidden = false;
       protocolError.textContent = errorCopy(e && e.code);
     }
